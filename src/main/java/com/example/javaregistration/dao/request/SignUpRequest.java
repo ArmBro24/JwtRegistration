@@ -10,16 +10,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SignUpRequest {
-    private String firstname;
-    private String lastname;
+    private Long id;
+    private String name;
     private String email;
     private String password;
-
-    public String getFirstName() {
-        return firstname;
-    }
-
-    public String getLastName(){
-        return lastname;
-    }
 }
+

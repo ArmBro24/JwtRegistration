@@ -1,5 +1,6 @@
 package com.example.javaregistration.config;
 
+import com.example.javaregistration.DTO.UserDTO;
 import com.example.javaregistration.service.JwtService;
 import com.example.javaregistration.service.UserService;
 import jakarta.servlet.FilterChain;
@@ -10,15 +11,14 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Repository;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Collections;
 
 @Component
 @RequiredArgsConstructor
@@ -28,13 +28,11 @@ public class JwtAuthentFilter extends OncePerRequestFilter {
     private final UserService userService;
 
     @Override
-    protected void doFilterInternal(@NonNull HttpServletRequest request,
-                                    @NonNull HttpServletResponse response, @NonNull FilterChain filterChain)
-            throws ServletException, IOException {
+    protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain) throws ServletException, IOException {
 
         final String authHeader = request.getHeader("Authorization");
         final String jwt;
-        final String userEmail;
+        /*final String userId;*/
 
         if (StringUtils.isEmpty(authHeader) || !StringUtils.startsWith(authHeader, "Bearer ")) {
             filterChain.doFilter(request, response);
@@ -42,24 +40,29 @@ public class JwtAuthentFilter extends OncePerRequestFilter {
         }
 
         jwt = authHeader.substring(7);
-        userEmail = jwtService.extractUserName(jwt);
 
-        if(StringUtils.isNotEmpty(userEmail)
-                && SecurityContextHolder.getContext().getAuthentication() == null){
-            UserDetails userDetails = userService.userDetailsService().loadUserByUsername(userEmail);
+        if (jwtService.isTokenValid(jwt)) {
+            String userId = jwtService.extractUserId(jwt);
+            UserDTO userDTO = userService.getFromId(Long.valueOf(userId));
 
-            if(jwtService.isTokenValid(jwt, userDetails)){
-                SecurityContext context = SecurityContextHolder.createEmptyContext();
+            if (userDTO != null) {
+                UserDetails userDetails = convertToUserDetails(userDTO);
 
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities());
+                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                context.setAuthentication(authToken);
-                SecurityContextHolder.setContext(context);
+                SecurityContextHolder.getContext().setAuthentication(authToken);
             }
         }
         filterChain.doFilter(request, response);
+
     }
 
+
+    private UserDetails convertToUserDetails(UserDTO userDTO) {
+        return new org.springframework.security.core.userdetails.User(userDTO.getName(), userDTO.getPassword(), Collections.emptyList());
+    }
 }
+
+
+

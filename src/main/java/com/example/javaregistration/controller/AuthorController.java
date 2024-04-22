@@ -17,10 +17,6 @@ public class AuthorController {
         this.authentService = authentService;
     }
 
-    @PostMapping("/signin")
-    public ResponseEntity<JwtAuthentResponse> signin(@RequestBody SigninRequest request){
-        return ResponseEntity.ok(authentService.signin(request));
-    }
 
     @GetMapping("/resource")
     public ResponseEntity<String> sayHello(){

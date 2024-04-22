@@ -1,8 +1,23 @@
 package com.example.javaregistration.service;
 
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.stereotype.Service;
+import com.example.javaregistration.DTO.UserDTO;
+
+import java.util.List;
 
 public interface UserService {
-    UserDetailsService userDetailsService();
+    UserDTO addUser(UserDTO userDTO);
+
+    UserDTO updateUser(final Long id, UserDTO uset);
+
+    UserDTO getFromId(final Long id);
+
+    void eraseUser(final Long id);
+
+    List<UserDTO> getEveryUser();
+
+    boolean userExists(final Long id);
+
+
+
+
 }
