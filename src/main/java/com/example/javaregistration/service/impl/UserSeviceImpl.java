@@ -70,7 +70,8 @@ public class UserSeviceImpl implements UserService {
         final boolean exists = userRepository.existsById(id);
 
         log.debug("User existence check for ID: {} - Exists: {}", id, exists);
-        return exists;    }
+        return exists;
+    }
 
     private User findUserById(final Long id){
 

@@ -32,7 +32,6 @@ public class JwtAuthentFilter extends OncePerRequestFilter {
 
         final String authHeader = request.getHeader("Authorization");
         final String jwt;
-        /*final String userId;*/
 
         if (StringUtils.isEmpty(authHeader) || !StringUtils.startsWith(authHeader, "Bearer ")) {
             filterChain.doFilter(request, response);
@@ -55,12 +54,11 @@ public class JwtAuthentFilter extends OncePerRequestFilter {
             }
         }
         filterChain.doFilter(request, response);
-
     }
 
 
     private UserDetails convertToUserDetails(UserDTO userDTO) {
-        return new org.springframework.security.core.userdetails.User(userDTO.getName(), userDTO.getPassword(), Collections.emptyList());
+        return new org.springframework.security.core.userdetails.User(userDTO.getEmail(), userDTO.getPassword(), Collections.emptyList());
     }
 }
 

@@ -15,7 +15,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -35,7 +34,8 @@ public class AuthentServiceImpl implements AuthentService {
         User user = User.builder().id(request.getId()).name(request.getName())
                 .email(request.getEmail()).password(passwordEncoder.encode(request.getPassword())).role(Role.USER).build();
         userRepository.save(user);
-        String jwt = jwtService.generateToken(user.getId());
+        String jwt = jwtService.generateToken(String.valueOf( user.getId()));
+
         return JwtAuthentResponse.builder().token(jwt).build();
     }
 
@@ -47,14 +47,13 @@ public class AuthentServiceImpl implements AuthentService {
             throw new BadCredentialsException("Invalid email or password", e);
         }
 
-        // Check if the user exists in the repository
         boolean userExists = userRepository.existsByEmail(request.getEmail());
         if (!userExists) {
             throw new UsernameNotFoundException("User not found");
         }
 
         UserDTO userDTO = userService.getFromId(Long.valueOf(request.getEmail()));
-        String jwt = jwtService.generateToken(userDTO.getId());
+        String jwt = jwtService.getToken(String.valueOf(userDTO.getId()));
 
         return JwtAuthentResponse.builder().token(jwt).build();
     }
